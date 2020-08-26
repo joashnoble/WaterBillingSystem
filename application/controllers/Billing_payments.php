@@ -181,8 +181,8 @@ class Billing_payments extends CORE_Controller
                 for($i=0;$i<=count($billing_id)-1;$i++){
                     if($this->get_numeric_value($payment_amount[$i]) > 0 || $this->get_numeric_value($deposit_payment[$i]) > 0 ){
                     $m_billing_payment_items->billing_payment_id=$billing_payment_id;
-                    $m_billing_payment_items->billing_id=$billing_id[$i];
-                    $m_billing_payment_items->disconnection_id=$disconnection_id[$i];
+                    $m_billing_payment_items->billing_id=$this->get_numeric_value($billing_id[$i]);
+                    $m_billing_payment_items->disconnection_id=$this->get_numeric_value($disconnection_id[$i]);
                     $m_billing_payment_items->receivable_amount=$this->get_numeric_value($receivable_amount[$i]);
                     $m_billing_payment_items->deposit_payment=$this->get_numeric_value($deposit_payment[$i]);
                     $m_billing_payment_items->payment_amount=$this->get_numeric_value($payment_amount[$i]);

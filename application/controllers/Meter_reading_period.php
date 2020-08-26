@@ -10,7 +10,7 @@ class Meter_reading_period extends CORE_Controller {
         $this->load->model('Trans_model');
         $this->load->model('Months_model');
         $this->load->model('Meter_reading_period_model');
-        $this->load->model('Meter_Reading_input_model');
+        $this->load->model('Meter_reading_input_model');
 
     }
 

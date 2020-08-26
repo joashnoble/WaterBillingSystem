@@ -82,7 +82,7 @@
                                                                     Account * : <br />
                                                                     <select id="cbo_accounts" class="form-control">
                                                                         <?php foreach($accounts as $account) { ?>
-                                                                            <option value="<?php echo $account->connection_id; ?>"><?php echo $account->customer_account; ?></option>
+                                                                            <option value="<?php echo $account->connection_id; ?>"><?php echo $account->serial_no; ?> - <?php echo $account->customer_name; ?></option>
                                                                         <?php } ?>
                                                                     </select>
                                                                 </div>

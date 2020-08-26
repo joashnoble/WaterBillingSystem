@@ -106,7 +106,7 @@
                                                             <table id="tbl_customer_receivables" class="table table-striped" cellspacing="0" width="100%">
                                                                 <thead class="">
                                                                 <tr>
-                                                                    <th width="15%">Account #</th>
+                                                                    <th width="15%">Serial #</th>
                                                                     <th>Customer</th>
                                                                     <th>Address</th>
                                                                     <th style="text-align: right;">Penalty</th>
@@ -227,7 +227,7 @@
                     }
                 },
                 "columns": [
-                    { targets:[0],data: "account_no" },
+                    { targets:[0],data: "serial_no" },
                     { targets:[1],data: "customer_name" },
                     { targets:[2],data: "address" },
                     {

@@ -632,12 +632,12 @@
                     { targets:[2],data: "receipt_no" },
                     { targets:[3],data: "receipt_name" },
                     { targets:[4],data: "serial_no" },
-                    { targets:[5],data: "payment_method" },
-                    { targets:[6],data: "posted_by_user" },
+                    { targets:[5],data: "payment_method" ,searchable: false },
+                    { targets:[6],data: "posted_by_user" ,searchable: false},
                     { targets:[7],data: "date_paid" },
                     { targets:[8],data: "total_paid_amount" },
                     {
-                        targets:[9],data: "is_active",
+                        targets:[9],data: "is_active", searchable: false,
                         render: function (data, type, full, meta){
                             if(data=="1"){
                                 _attribute='class="fa fa-check" style="color:#4caf50;font-size:30px;"';
@@ -648,7 +648,7 @@
                         }
                     },
                     {
-                        targets:[10],data: "is_active",
+                        targets:[10],data: "is_active",searchable: false,
                         render: function (data, type, full, meta){
                             if(data=="1"){
                                 return btn_cancel_billing_payment;

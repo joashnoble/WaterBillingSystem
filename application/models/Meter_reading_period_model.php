@@ -56,7 +56,7 @@ class Meter_reading_period_model extends CORE_Model {
 			UNION ALL
 			SELECT 
 			scr.connection_id,
-			DATE(CONCAT(YEAR(scr.service_date),  "-", MONTH(scr.service_date), "-01")) as applicable_month,
+			DATE_SUB(DATE(CONCAT(YEAR(scr.service_date),  "-", MONTH(scr.service_date), "-01")), INTERVAL 1 MONTH) as applicable_month,
 			scr.initial_meter_reading as current_reading
 			FROM service_connection scr
 			 
@@ -103,7 +103,7 @@ class Meter_reading_period_model extends CORE_Model {
 
 			SELECT 
 			scr.connection_id,
-			DATE(CONCAT(YEAR(scr.service_date),  "-", MONTH(scr.service_date), "-01")) as applicable_month,
+			DATE_SUB(DATE(CONCAT(YEAR(scr.service_date),  "-", MONTH(scr.service_date), "-01")), INTERVAL 1 MONTH) as applicable_month,
 			scr.initial_meter_reading as current_reading
 			FROM service_connection scr
 			 

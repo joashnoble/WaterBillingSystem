@@ -49,7 +49,7 @@ class MeterInventory extends CORE_Controller {
                 break;
 
             case 'open':
-                $response['data']=$this->Meter_inventory_model->getList(null,2,null,1);
+                $response['data']=$this->Meter_inventory_model->getList(null,2,null,null);
                 echo json_encode($response);
                 break;
 

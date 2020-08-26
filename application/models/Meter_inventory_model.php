@@ -21,7 +21,7 @@ class Meter_inventory_model extends CORE_Model{
 				    (SELECT sc.receipt_name FROM service_connection sc 
 						LEFT JOIN customers c ON c.customer_id = sc.customer_id
 				        WHERE sc.meter_inventory_id = inv.meter_inventory_id
-				        AND sc.is_deleted = 0
+				        AND sc.is_deleted = 0 AND sc.status_id = 1
 					),'N/A') as customer_name
 				FROM
 				    meter_inventory inv

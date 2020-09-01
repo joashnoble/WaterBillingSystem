@@ -137,6 +137,7 @@
                                                                 <th>Customer</th>
                                                                 <th>Meter Serial</th>
                                                                 <th>Service Date</th>
+                                                                <th>Status</th>
                                                                 <th><center>Action</center></th>
                                                             </tr>
                                                             </thead>
@@ -919,7 +920,7 @@
                 },
                 "dom": '<"toolbar">frtip',
                 "bLengthChange":false,
-                "order": [[ 7, "desc" ]],
+                "order": [[ 8, "desc" ]],
                 "pageLength": 15,
                 "ajax" : "ServiceConnection/transaction/list",
                 "columns": [
@@ -935,13 +936,14 @@
                     { targets:[3],data: "receipt_name" },
                     { targets:[4],data: "serial_no" },
                     { targets:[5],data: "service_date" },
+                    { targets:[6],data: "current_account_status" },
                     {
-                        targets:[6],
+                        targets:[7],
                         render: function (data, type, full, meta){
                             return '<center>'+btn_edit_service_connection+'&nbsp;'+btn_trash_service_connection+'</center>';
                         }
                     },
-                    { targets:[7],data: "connection_id", visible:false}
+                    { targets:[8],data: "connection_id", visible:false}
                 ]
             });
 

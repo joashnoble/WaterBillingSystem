@@ -23,7 +23,8 @@ class Service_connection_model extends CORE_Model{
             CONCAT_WS(' ',a.first_name,a.middle_name,a.last_name) as attendant,
 		    DATE_FORMAT(sc.service_date, '%m/%d/%Y') AS service_date,
 		    DATE_FORMAT(sc.target_date, '%m/%d/%Y') AS target_date,
-            CONCAT(DATE_FORMAT(sc.target_date, '%m/%d/%Y'),' ',sc.target_time) as installation_date
+            CONCAT(DATE_FORMAT(sc.target_date, '%m/%d/%Y'),' ',sc.target_time) as installation_date,
+            if(sc.status_id = 2, 'Inactive', 'Active') as current_account_status
 		FROM
 		    service_connection sc
 		        LEFT JOIN

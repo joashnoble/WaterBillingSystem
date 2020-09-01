@@ -32,7 +32,8 @@ class Billing_payments extends CORE_Controller
         $data['_top_navigation'] = $this->load->view('template/elements/top_navigation', '', TRUE);
 
 
-        $data['accounts']=$this->Service_connection_model->get_list(array('service_connection.is_active'=> TRUE, 'service_connection.is_deleted'=> FALSE), 'connection_id,account_no,customer_name,serial_no,receipt_name',
+        $data['accounts']=$this->Service_connection_model->get_list(array('service_connection.is_active'=> TRUE, 'service_connection.is_deleted'=> FALSE), 'connection_id,account_no,customer_name,serial_no,receipt_name,if(service_connection.status_id = 2, "Inactive", "Active") as current_account_status',
+
             array(
                 array('customers c', 'c.customer_id=service_connection.customer_id','left'),
                 array('meter_inventory','meter_inventory.meter_inventory_id = service_connection.meter_inventory_id','left')

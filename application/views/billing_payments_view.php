@@ -123,6 +123,7 @@
             border: none!important;
         }
 
+        .center { text-align: center; }
     </style>
 </head>
 
@@ -310,9 +311,9 @@
                                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                                         <label class="control-label"><strong>Please select an Account<b class="required">*</b> :</strong></label>
                                                         <select id="cbo_accounts" style="width: 100%;" name="connection_id">
-                                                            <optgroup label="Account # | Customer Name | Meter Serial">
+                                                            <optgroup label=" Meter Serial | Customer Name |  Account # | Account Status">
                                                                 <?php foreach($accounts as $account){ ?>
-                                                                    <option value="<?php echo $account->connection_id; ?>"><?php echo $account->account_no; ?> | <?php echo $account->receipt_name; ?> | <?php echo $account->serial_no; ?></option>
+                                                                    <option value="<?php echo $account->connection_id; ?>"><?php echo $account->serial_no; ?>  | <?php echo $account->receipt_name; ?> | <?php echo $account->account_no; ?> | <?php echo $account->current_account_status; ?>  </option>
                                                                 <?php } ?>
                                                             </optgroup>
                                                         </select>
@@ -560,8 +561,9 @@
                         var $result = $(
                             '<div class="row">' +
                                 '<div class="col-md-2">' + r[0] + '</div>' +
-                                '<div class="col-md-8">' + r[1] + '</div>' +
+                                '<div class="col-md-6">' + r[1] + '</div>' +
                                 '<div class="col-md-2">' + r[2] + '</div>' +
+                                '<div class="col-md-2 center">' + r[3] + '</div>' +
                             '</div>'
                         );
                         return $result;
@@ -817,7 +819,7 @@
                 processData : false,
                 contentType : false,
                 beforeSend : function(){
-                    $('#tbl_items > tbody').html('<tr><td align="center" colspan="8"><br /><img src="assets/img/loader/ajax-loader-sm.gif" /><br /><br /></td></tr>');
+                    $('#tbl_items > tbody').html('<tr><td align="center" colspan="7"><br /><img src="assets/img/loader/ajax-loader-sm.gif" /><br /><br /></td></tr>');
                 },
                 success : function(response){
                     var rows=response.receivables;
@@ -894,6 +896,7 @@
 
             $('#tbl_items > tbody').on('keyup','input.numeric',function(e){
                 var row=$(this).closest('tr');
+                var total_deposit_check = 0;
                 var payment=getFloat(row.find('input[name="payment_amount[]"]').val());
                 var payable=getFloat(row.find('input[name="receivable_amount[]"]').val());
                 var deposit=getFloat(row.find('input[name="deposit_payment[]"]').val());
@@ -905,6 +908,26 @@
                     });
                     $(this).val('');
                 }
+                var deposit_allowed_check =  getFloat($('input[name="deposit_allowed"]').val());
+                var rows_check=$('#tbl_items > tbody > tr');
+                $.each(rows_check,function(i,value){
+                    var rowcheck=$(this);
+                    total_deposit_check+=getFloat(rowcheck.find('input[name="deposit_payment[]"]').val());
+                });
+
+                if((deposit_allowed_check) < total_deposit_check){
+                    showNotification({
+                        "title": "Invalid!",
+                        "stat" : "error",
+                        "msg" : "Sorry, Deposit Amount Used is greater than the Allowable Deposit."
+                    });
+
+                    row.find('input[name="deposit_payment[]"]').val(accounting.formatNumber(0,2));
+                    row.find('input[name="deposit_payment[]"]').trigger('keyup');
+
+                }
+
+
                 reComputeDetails();
             });
 
@@ -1047,19 +1070,7 @@
             $('input[name="remaining_deposit"]').val(accounting.formatNumber(deposit_remaining,2));
             $('input[name="total_payment_amount"]').val(accounting.formatNumber(total_payment,2));
 
-            if((deposit_allowed) < total_deposit){
-                showNotification({
-                    "title": "Invalid!",
-                    "stat" : "error",
-                    "msg" : "Sorry, Deposit Amount Used is greater than the Allowable Deposit."
-                });
-                $.each(rows,function(i,value){
-                    var row=$(this);
-                    row.find('input[name="deposit_payment[]"]').val(accounting.formatNumber(0,2));
-                    row.find('input[name="deposit_payment[]"]').trigger('keyup');
-                });
 
-            }
 
         };
 
@@ -1085,7 +1096,7 @@
 
      var newRowItemBlank=function(d){
         return '<tr>'+
-        '<td colspan="8"><i><b>No receivables found.</b></i></td>'+
+        '<td colspan="7"><i><b>No receivables found.</b></i></td>'+
         '</tr>';
     };   
 

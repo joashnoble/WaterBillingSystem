@@ -339,7 +339,8 @@ class ServiceConnection extends CORE_Controller {
                 $excel->getActiveSheet()->getColumnDimension('L')->setWidth('20');
                 $excel->getActiveSheet()->getColumnDimension('M')->setWidth('20');
                 $excel->getActiveSheet()->getColumnDimension('N')->setWidth('20');
-                $excel->getActiveSheet()->getColumnDimension('O')->setWidth('20');
+                $excel->getActiveSheet()->getColumnDimension('O')->setWidth('25');
+                $excel->getActiveSheet()->getColumnDimension('P')->setWidth('20');
 
                  $style_header = array(
 
@@ -353,7 +354,7 @@ class ServiceConnection extends CORE_Controller {
                 );
 
 
-                $excel->getActiveSheet()->getStyle('A9:O9')->applyFromArray( $style_header );
+                $excel->getActiveSheet()->getStyle('A9:P9')->applyFromArray( $style_header );
 
                 $excel->getActiveSheet()->setCellValue('A9','#')
                                         ->getStyle('A9')->getFont()->setBold(TRUE);
@@ -385,6 +386,8 @@ class ServiceConnection extends CORE_Controller {
                                         ->getStyle('N9')->getFont()->setBold(TRUE);
                 $excel->getActiveSheet()->setCellValue('O9','Attended By')
                                         ->getStyle('O9')->getFont()->setBold(TRUE);
+                $excel->getActiveSheet()->setCellValue('P9','Attended By')
+                                        ->getStyle('P9')->getFont()->setBold(TRUE);                                        
 
                 $a=1;
                 $i=10;
@@ -404,7 +407,8 @@ class ServiceConnection extends CORE_Controller {
                                         ->setCellValue('L'.$i,$row->customer_account_type_desc)
                                         ->setCellValue('M'.$i,$row->initial_meter_reading)
                                         ->setCellValue('N'.$i,$row->initial_meter_deposit)
-                                        ->setCellValue('O'.$i,$row->attendant);
+                                        ->setCellValue('O'.$i,$row->attendant)
+                                        ->setCellValue('P'.$i,$row->current_account_status);
                 $i++;
                 $a++;
 

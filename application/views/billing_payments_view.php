@@ -208,7 +208,9 @@
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <div class="panel-footer"></div>
+                                        <div class="panel-footer">
+                                            <small> <i> Note: Click the Receipt # to show Payment Details. </i></small>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -499,6 +501,30 @@
             </div>
         </footer>
     </div>
+
+    <div id="modal_receipt_details" class="modal fade" tabindex="-1" role="dialog"><!--modal-->
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close"   data-dismiss="modal" aria-hidden="true">X</button>
+                    <h4 class="modal-title" style="color:white;"> Payment Details | <small id="modal_receipt_no" style="color:white;"> </small></h4>
+
+                </div>
+
+                <div id="modal_receipt_details_body" class="modal-body">
+                </div>
+            </div>
+        </div>
+        <footer role="contentinfo">
+            <div class="clearfix">
+                <ul class="list-unstyled list-inline pull-left">
+                    <li><h6 style="margin: 0;">&copy; 2018 - JDEV OFFICE SOLUTION INC</h6></li>
+                </ul>
+                <button class="pull-right btn btn-link btn-xs hidden-print" id="back-to-top"><i class="ti ti-arrow-up"></i></button>
+            </div>
+        </footer>
+    </div>
+
 </div>
 
 
@@ -631,7 +657,7 @@
                             
                         }
                     },
-                    { targets:[2],data: "receipt_no" },
+                    { targets:[2],data: "receipt_no", "class": "details-receipt", },
                     { targets:[3],data: "receipt_name" },
                     { targets:[4],data: "serial_no" },
                     { targets:[5],data: "payment_method" ,searchable: false },
@@ -714,6 +740,27 @@
                     window.open('Billing_payments/transaction/billing-payment-print/'+ d.billing_payment_id);
                 }
             });
+
+            $('#tbl_payments tbody').on( 'click', 'tr td.details-receipt', function () {
+                var tr = $(this).closest('tr');
+                var row = dt.row( tr );
+                var d=row.data();
+                
+                $('#modal_receipt_no').text(d.receipt_no)
+
+                $.ajax({
+                    "dataType":"html",
+                    "type":"POST",
+                    "url":"Billing_payments/transaction/receipt-details/"+ d.billing_payment_id
+                }).done(function(response){
+                    $('#modal_receipt_details_body').html(response);
+                    $('#modal_receipt_details').modal('show');
+                });
+
+                 // html('<tr><td align="center" colspan="7"><br /><img src="assets/img/loader/ajax-loader-sm.gif" /><br /><br /></td></tr>');
+                // window.open('Billing_payments/transaction/billing-payment-print/'+ d.billing_payment_id);
+
+            });            
 
 
             // $('#tbl_payments tbody').on( 'click', 'tr td.details-control-refund', function () {

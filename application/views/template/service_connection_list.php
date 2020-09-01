@@ -75,6 +75,7 @@
                 <th style="text-align: right;">Initial Reading</th>
                 <th style="text-align: right;">Initial Deposit</th>
                 <th>Attended By</th>
+                <th>Current Account Status</th>
             </tr>
             </thead>
             <tbody>
@@ -99,6 +100,7 @@
                 <td align="right"><?php echo number_format($row->initial_meter_deposit,2) ?></td>
 
                 <td><?php echo $row->attendant ?></td>
+                <td><?php echo $row->current_account_status ?></td>
             </tr>
             <?php $i++; } ?>
 

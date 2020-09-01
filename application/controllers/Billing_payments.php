@@ -79,7 +79,12 @@ class Billing_payments extends CORE_Controller
                 echo json_encode($response);
             break;
     
+            case  'receipt-details' :
+                $data['info']= $this->response_rows($filter_value)[0];
+                $data['items']= $this->Billing_payment_items_model->get_receipt_info($filter_value);
+                echo $this->load->view('template/receipt_details_content',$data,TRUE);
 
+            break;
         
             case 'billing-payment-print':
                 $info= $this->response_rows($filter_value)[0];
@@ -283,8 +288,10 @@ class Billing_payments extends CORE_Controller
                 'payment_methods.payment_method',
                 'customers.customer_name',
                 'service_connection.account_no',
+                'service_connection.address',
                 'service_connection.receipt_name',
-                'CONCAT_WS(" ",user_accounts.user_fname,user_accounts.user_lname)as posted_by_user'
+                'CONCAT_WS(" ",user_accounts.user_fname,user_accounts.user_lname)as posted_by_user',
+                'CONCAT_WS(" ",uac.user_fname,uac.user_lname) as cancelled_by'
             ),
             //joins
             array(
@@ -292,7 +299,8 @@ class Billing_payments extends CORE_Controller
                 array('service_connection','service_connection.connection_id=billing_payments.connection_id','left'),
                 array('meter_inventory','meter_inventory.meter_inventory_id=service_connection.meter_inventory_id','left'),
                 array('customers','customers.customer_id=service_connection.customer_id','left'),
-                array('payment_methods','payment_methods.payment_method_id=billing_payments.payment_method_id','left')
+                array('payment_methods','payment_methods.payment_method_id=billing_payments.payment_method_id','left'),
+                array('user_accounts uac','uac.user_id=billing_payments.cancelled_by_user','left'),
             ),
             'billing_payments.billing_payment_id DESC'
 

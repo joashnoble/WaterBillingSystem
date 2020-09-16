@@ -443,7 +443,12 @@ class Billing_model extends CORE_Model{
 											WHEN (x.total_consumption+1) <= matrix_residential_to
 											THEN (((x.total_consumption+1) - matrix_residential_from)*matrix_residential_amount)
 											END))
-										 FROM matrix_residential_items WHERE matrix_residential_from <= (x.total_consumption+1))
+										 FROM matrix_residential_items 
+										 LEFT JOIN matrix_residential ON matrix_residential.matrix_residential_id = matrix_residential_items.matrix_residential_id
+										 WHERE 
+										 	matrix_residential.matrix_residential_id = default_matrix_id AND
+										 	matrix_residential_from <= (x.total_consumption+1) AND 
+										 	matrix_residential.is_deleted = FALSE) 
 									ELSE
 										(SELECT
 											SUM((CASE 
@@ -457,7 +462,12 @@ class Billing_model extends CORE_Model{
 											WHEN (x.total_consumption+1) <= matrix_commercial_to
 											THEN (((x.total_consumption+1) - matrix_commercial_from)*matrix_commercial_amount)
 											END))
-										 FROM matrix_commercial_items WHERE matrix_commercial_from <= (x.total_consumption+1))
+										 FROM matrix_commercial_items 
+										 LEFT JOIN matrix_commercial ON matrix_commercial.matrix_commercial_id = matrix_commercial_items.matrix_commercial_id
+										 WHERE 
+											 matrix_commercial.matrix_commercial_id = default_matrix_id AND
+											 matrix_commercial_from <= (x.total_consumption+1) AND 
+											 matrix_commercial.is_deleted = FALSE)
 								END) as amount_due,
 					            -- (CASE
 					            --     WHEN

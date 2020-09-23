@@ -18,6 +18,7 @@ class Billing_payments extends CORE_Controller
         $this->load->model('Billing_payments_model');
         $this->load->model('Billing_payment_items_model');
         $this->load->model('Payment_method_model');
+        $this->load->library('M_pdf');        
 
     }
 
@@ -81,7 +82,7 @@ class Billing_payments extends CORE_Controller
     
             case  'receipt-details' :
                 $data['info']= $this->response_rows($filter_value)[0];
-                $data['items']= $this->Billing_payment_items_model->get_receipt_info($filter_value);
+                $data['items']= $this->Billing_payment_items_model->get_receipt_info_v2($filter_value);
                 echo $this->load->view('template/receipt_details_content',$data,TRUE);
 
             break;
@@ -95,6 +96,27 @@ class Billing_payments extends CORE_Controller
                 $data['company_info']=$company_info[0];
                 echo $this->load->view('template/billing_payment_print_content',$data,TRUE); 
             break;
+
+            case 'billing-payment-print-v2':
+
+                $info= $this->response_rows($filter_value)[0];
+                $data['num_words']=$this->convertDecimalToWords($info->total_payment_amount);
+                $data['info'] =$info;
+                $m_company_info=$this->Company_model;
+                $company_info=$m_company_info->get_list();
+                $data['company_info']=$company_info[0];
+                $data['items']= $this->Billing_payment_items_model->get_receipt_info_v2($filter_value);
+                // echo $this->load->view('template/billing_payment_print_content_v2',$data,TRUE); 
+
+                    $file_name=$info->control_no;
+                    $pdfFilePath = $file_name.".pdf"; //generate filename base on id
+                    $pdf = $this->m_pdf->load(); //pass the instance of the mpdf class
+                    $content=$this->load->view('template/billing_payment_print_content_v2',$data,TRUE); //load the template
+                    $pdf->WriteHTML($content);
+                    //download it.
+                    $pdf->Output();
+
+            break;            
 
             case 'billing-payment-print-refund':
                 $info= $this->response_rows($filter_value)[0];
@@ -284,6 +306,7 @@ class Billing_payments extends CORE_Controller
                 'billing_payments.*',
                 'meter_inventory.serial_no',
                 'DATE_FORMAT(billing_payments.date_paid,"%m/%d/%Y")as date_paid',
+                'DATE_FORMAT(billing_payments.check_date,"%m/%d/%Y")as check_date',
                 'FORMAT(billing_payments.total_paid_amount,2)as total_paid_amount',
                 'payment_methods.payment_method',
                 'customers.customer_name',

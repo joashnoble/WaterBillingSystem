@@ -2,7 +2,7 @@
 
     <table width="100%" border="0" cellspacing="-1" style=""> 
         <tr>
-            <td width="40%" style="padding: 4px;"><strong>Receipt Type</strong> </td>
+            <td width="40%" style="padding: 4px;"><strong>Meter Serial No:</strong> <?php echo $info->serial_no; ?> </td>
             <td width="60%" style="padding: 4px;" colspan="2"><strong>Account # :</strong> <?php echo $info->account_no; ?></td>
         </tr>
         <tr>
@@ -30,34 +30,38 @@
 
 
 
-    <table class="table table-striped" cellspacing="0" width="100%" style="font-font:tahoma;">
-        <thead class="">    
-            <tr>        
-                <th>Control No</th>
-                <th>Description</th>
-                <th width="15%">Due Date</th>
-                <th width="15%" style="text-align: right;">Amount Due</th>
-                <th width="15%" style="text-align: right;">Deposit</th>
-                <th width="15%" style="text-align: right;">Payment</th>
+        <table width="100%" style="font-size: 12px"  class="modal-child table table-striped"  > 
+        <thead>
+            <tr>
+                <th style="text-align: left;">MONTH</th>
+                <th>DUE DATE</th>
+                <th>AMOUNT DUE</th>
+                <th>PENALTY</th>
+                <th>SUBTOTAL</th>
             </tr>
         </thead>
         <tbody>
-        <?php foreach ($items as $item) { ?>
+        <?php $grand_total_payment = 0; foreach ($items as $item) {  $grand_total_payment += $item->total_payment;?>
             <tr>
-                <td><?php echo $item->control_no ?></td>
-                <td><?php  echo $item->month_name; ?> <?php echo $item->meter_reading_year; ?> (<?php echo $item->transaction_type; ?>)</td>
-                <td><?php echo $item->due_date ?></td>
-                <td style="text-align: right;"><?php  echo $item->receivable_amount ?></td>
-                <td style="text-align: right;"><?php  echo $item->deposit_payment ?></td>
-                <td style="text-align: right;"><?php  echo $item->payment_amount ?></td>
+                <td style="text-align: left;"><?php  echo $item->month_name; ?> <?php echo $item->meter_reading_year; ?>  (<?php echo $item->transaction_type; ?>)</td>
+                <td><?php echo date('F d, Y', strtotime($item->due_date)); ?></td>
+                <td> <?php echo number_format($item->amount_paid,2); ?></td>
+                <td> <?php echo number_format($item->penalty_paid,2); ?></td>
+                <td style="text-align: right;"><?php  echo number_format($item->total_payment,2) ?></td>
             </tr>
         <?php } ?>
         </tbody>
-        <tfoot>
-
-
-        </tfoot>
-    </table>
+            <tfoot>   
+            <tr>
+                <td style="text-align: left;"></td>
+                <td></td>
+                <td> </td>
+                <td style="text-align: right;font-weight: bold;"> GRAND TOTAL</td>
+                <td style="text-align: right;font-weight: bold;"><?php  echo number_format($grand_total_payment,2); ?></td>
+            </tr>   
+            </tfoot>     
+        
+        </table>
 
 
 <small><i> <b>Created by </b> : <?php echo $info->posted_by_user; ?><b> on </b>  <?php echo  $info->date_created; ?></i> </small> <br>

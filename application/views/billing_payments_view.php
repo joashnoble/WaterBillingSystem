@@ -124,6 +124,17 @@
         }
 
         .center { text-align: center; }
+
+    table.modal-child th {
+        text-align: right;
+        padding: 5px;
+
+    }
+    table.modal-child td {
+        text-align: right;
+        padding: 5px;
+
+    }    
     </style>
 </head>
 
@@ -737,7 +748,7 @@
                 else {
                     tr.addClass( 'details' );
                     var d=row.data();
-                    window.open('Billing_payments/transaction/billing-payment-print/'+ d.billing_payment_id);
+                    window.open('Billing_payments/transaction/billing-payment-print-v2/'+ d.billing_payment_id);
                 }
             });
 

@@ -976,6 +976,59 @@ class Billing_model extends CORE_Model{
                         return $query->result();
     }
 
+    function update_arrears($start_date,$end_date){
+        $query=$this->db->query("SELECT penalties.* FROM (
+						     SELECT 
+								b.control_no AS ref_no,
+							    CONCAT('Penalty (','',m.month_name,' ',mrp.meter_reading_year,')') as transaction,
+								CONCAT(m.abrv,' ',mrp.meter_reading_year) as 'Month',
+								(SELECT billing_id FROM billing WHERE previous_month = CONCAT(m.abrv,' ',mrp.meter_reading_year) AND connection_id = b.connection_id) as previous_id,
+								DATE_FORMAT(DATE_ADD(b.due_date, INTERVAL 1 DAY), '%m/%d/%Y') as date_txn,
+								(CASE WHEN payment.date_paid IS NULL 
+								## check if now is less than the due,
+                                THEN 
+									(CASE WHEN DATE(NOW()) > b.due_date 
+										THEN  # NO PAYMENT AND AFTER DUE DATE
+											 b.penalty_amount #no payment with penalty 
+										ELSE 0 #no payment without penalty 
+                                       
+                                        END)
+								ELSE # IF THERE IS PAYMENT
+									(CASE WHEN DATE(payment.date_paid) > b.due_date # MAX DATE
+										THEN # WITH PAYMENT AFTER DUE WITH PENALTY
+											b.penalty_amount
+                                        ELSE # WITH PAYMENT BEFORE DUE
+											(CASE WHEN DATE(NOW()) > DATE(b.due_date)
+                                            THEN #'with payment before due and current date after  due'
+												(CASE WHEN payment.payment_amount >= (b.amount_due + b.charges_amount)
+													THEN 0 # NO PENALTY
+                                                    ELSE b.penalty_amount #WITH PENALTY
+                                                    END)
+                                            ELSE #with payment before due and current date before due without penalty
+                                            0 
+                                            END )
+									END )
+                                END) as fee,
+							        0 as payment
+
+							FROM
+							billing b
+							LEFT JOIN meter_reading_period mrp ON mrp.meter_reading_period_id = b.meter_reading_period_id
+							LEFT JOIN (SELECT bpi.billing_id,
+							MAX(date_paid) as date_paid, 
+							(SUM(payment_amount) + SUM(deposit_payment)) as payment_amount FROM billing_payment_items bpi
+							LEFT JOIN billing_payments bp ON bp.billing_payment_id = bpi.billing_payment_id
+							LEFT JOIN billing b ON b.billing_id = bpi.billing_id 
+							WHERE bp.is_active = TRUE AND bp.is_deleted = FALSE AND bp.date_paid <= b.due_date
+							GROUP BY bpi.billing_id) as payment ON payment.billing_id = b.billing_id
+							LEFT JOIN months m ON m.month_id = mrp.month_id
+							WHERE DATE(DATE_ADD(b.due_date, INTERVAL 1 DAY)) BETWEEN '".$start_date."' AND '".$end_date."' 
+
+						GROUP BY b.billing_id) as penalties  
+                        
+                        WHERE fee > 0 AND previous_id > 0");
+		return $query->result();
+    }
 
 }
 

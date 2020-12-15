@@ -63,6 +63,41 @@ class Billing_statement extends CORE_Controller {
                 echo json_encode($response);
                 break;
 
+            case 'update_report':
+
+                $start_date='2020-01-01';
+                $end_date='2020-12-31';
+
+                $m_billing = $this->Billing_model;
+
+                $update_arrears = $m_billing->update_arrears($start_date,$end_date);
+
+                if(count($update_arrears) > 0){
+
+
+                    for ($i=0; $i < count($update_arrears); $i++) { 
+
+                        $m_billing->arrears_penalty_amount = $this->get_numeric_value($update_arrears[$i]->fee);
+                        $m_billing->modify($update_arrears[$i]->previous_id);
+
+                    }
+
+                    $response['title']='Success!';
+                    $response['stat']='success';
+                    $response['msg']='Arrears Penalty successfully updated.';
+
+                }else{
+
+                    $response['title']='Error!';
+                    $response['stat']='error';
+                    $response['msg']='No update found for billing statements.';
+
+                }
+
+                echo json_encode($response);
+
+                break;
+
         }
     }
 }

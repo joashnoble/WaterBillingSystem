@@ -152,6 +152,11 @@
                                                         <button type="button" class="btn btn-success" id="print_report" style="width: 100%;margin-top: 5px;">
                                                             <i class="fa fa-print"></i> Print Report
                                                         </button>
+
+                                                        <button type="button" class="btn btn-success" id="update_report" style="width: 100%;margin-top: 5px;">
+                                                            <i class="fa fa-refresh"></i> Update Billing Statement
+                                                        </button>
+
                                                     </div>
                                                 </div><br>
                                                 Note: The <b>Grand Total Column </b> does not include the penalty after due date of the current period.
@@ -451,7 +456,26 @@ $(document).ready(function(){
                 showNotification({title:"Error!",stat:"error",msg:"Meter Period is Required!"});
             }
 
-        });                
+        });    
+
+        $('#update_report').on('click',function(){
+            update_report().done(function(response){
+                if(response.stat == "success"){
+                    showNotification(response);
+                }
+            }).always(function(){
+                showSpinningProgress($('#update_report'));
+            });
+        });
+
+        var update_report=function(){
+            return $.ajax({
+                "dataType":"json",
+                "type":"POST",
+                "url":"Billing_statement/transaction/update_report",
+                "beforeSend": showSpinningProgress($('#update_report'))
+            });
+        };    
 
         $('#tbl_billing tbody').on('click','button[name="edit_info"]',function(){
             _txnMode="edit";

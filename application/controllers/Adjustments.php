@@ -321,8 +321,6 @@ class Adjustments extends CORE_Controller
                 $m_adjustment->is_deleted=1;//mark as deleted
                 $m_adjustment->modify($adjustment_id);
 
-                }
-
                 //end update product on_hand after Adjustment is deleted...
                 $adj_info=$m_adjustment->get_list($adjustment_id,'adjustment_code');
                 $m_trans=$this->Trans_model;

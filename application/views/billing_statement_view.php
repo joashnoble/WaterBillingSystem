@@ -149,8 +149,11 @@
                                                             <i class="fa fa-print"></i> Print Billing
                                                         </button>
 
-                                                        <button type="button" class="btn btn-success" id="print_report" style="width: 100%;margin-top: 5px;">
-                                                            <i class="fa fa-print"></i> Print Report
+                                                        <button type="button" class="btn btn-success" id="print_report" style="width: 49%;margin-top: 5px;">
+                                                            <i class="fa fa-print"></i> Print
+                                                        </button>
+                                                        <button type="button" class="btn btn-warning" id="export_report" style="width: 49%;margin-top: 5px;">
+                                                            <i class="fa fa-file-excel-o"></i> Export
                                                         </button>
 
                                                         <button type="button" class="btn btn-success" id="update_report" style="width: 100%;margin-top: 5px;">
@@ -456,7 +459,19 @@ $(document).ready(function(){
                 showNotification({title:"Error!",stat:"error",msg:"Meter Period is Required!"});
             }
 
-        });    
+        });
+
+        $(document).on('click','#export_report',function(){
+            var period_id = _cboPeriod.select2('val');
+
+            if(period_id != null){
+                window.open('Templates/layout/billing_statement_report?type=export&period_id='+_cboPeriod.select2('val')+'&meter_reading_input_id='+_cboBatchNo.select2('val')+'&customer_id'+_cboCustomer.select2('val'));
+
+            }else{
+                showNotification({title:"Error!",stat:"error",msg:"Meter Period is Required!"});
+            }
+
+        });        
 
         $('#update_report').on('click',function(){
             update_report().done(function(response){

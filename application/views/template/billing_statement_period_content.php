@@ -46,10 +46,11 @@
 <table width="100%">
     <thead>
         <tr>
-            <th align="left" width="10%"><b>Account No</b></th>
-            <th align="left" width="20%"><b>Customer Name</b> </th>
-            <th align="right" width="10%"><b>Total Consumption</b></th>
-            <th align="right" width="10%"><b>Amount Due</b></th>
+            <th align="left" width="12%"><b>Account No</b></th>
+            <th align="left" width="22%"><b>Customer Name</b> </th>
+            <th align="left" width="10%"><b>Serial No</b> </th>
+            <th align="right" width="8%"><b>Total Consumption</b></th>
+            <th align="right" width="8%"><b>Amount Due</b></th>
             <th align="right" width="10%"><b>Previous Balance</b></th>
             <th align="right" width="10%"><b>Arrears Penalty</b></th>
             <th align="right" width="10%"><b>Charges</b></th>
@@ -66,6 +67,7 @@
             <tr>
                 <td><?php echo $billing->account_no; ?></td>
                 <td><?php echo $billing->receipt_name; ?></td>
+                <td><?php echo $billing->serial_no; ?></td>
                 <td align="right"><?php echo number_format($billing->total_consumption,0); ?></td>
                 <td align="right"><?php echo number_format($billing->amount_due,2); ?></td>
                 <td align="right"><?php echo number_format($billing->previous_balance,2);?></td>
@@ -75,12 +77,12 @@
             </tr>
         <?php }
             echo '<tr>';
-            echo '<td colspan="7" align="right" style="border-top: 1px solid lightgray;"><b>Total</b></td>';
+            echo '<td colspan="8" align="right" style="border-top: 1px solid lightgray;"><b>Total</b></td>';
             echo '<td align="right" style="border-top: 1px solid lightgray;"><b>'.number_format($total ,2).'</b></td>';
             echo '</tr>';
         }else{
             echo '<tr>';
-            echo '<td colspan="8" style="border-top: 1px solid lightgray;">';        
+            echo '<td colspan="9" style="border-top: 1px solid lightgray;">';        
             echo '<center>No Data Available</center>';
             echo '</td>';
             echo '</tr>';

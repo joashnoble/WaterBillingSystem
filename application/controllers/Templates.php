@@ -6744,52 +6744,55 @@ class Templates extends CORE_Controller {
                                             ->setCellValue('A3',$company_info[0]->landline.'/'.$company_info[0]->mobile_no)
                                             ->setCellValue('A4',$company_info[0]->email_address);
                     
-                    $excel->getActiveSheet()->mergeCells('A6:I6');
+                    $excel->getActiveSheet()->mergeCells('A6:J6');
                     $excel->getActiveSheet()->setCellValue('A6','Monthly Billing Summary')
                                             ->getStyle('A6')->getFont()->setBold(TRUE);
 
-                    $excel->getActiveSheet()->mergeCells('A7:I7');
+                    $excel->getActiveSheet()->mergeCells('A7:J7');
                     $excel->getActiveSheet()->setCellValue('A7','Date Inclusive : '.$meter_period[0]->date_inclusive)
                                             ->getStyle('A7')->getFont()->setBold(TRUE);
 
                     $excel->getActiveSheet()
-                            ->getStyle('A:C')
+                            ->getStyle('A:D')
                             ->getAlignment()
                             ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 
                     $excel->getActiveSheet()
-                            ->getStyle('D:I')
+                            ->getStyle('E:J')
                             ->getAlignment()
                             ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT); 
 
                     $excel->getActiveSheet()->getColumnDimension('A')->setWidth('20');
                     $excel->getActiveSheet()->getColumnDimension('B')->setWidth('40');
-                    $excel->getActiveSheet()->getColumnDimension('C')->setWidth('18');
+                    $excel->getActiveSheet()->getColumnDimension('C')->setWidth('30');
                     $excel->getActiveSheet()->getColumnDimension('D')->setWidth('18');
                     $excel->getActiveSheet()->getColumnDimension('E')->setWidth('18');
                     $excel->getActiveSheet()->getColumnDimension('F')->setWidth('18');
                     $excel->getActiveSheet()->getColumnDimension('G')->setWidth('18');
                     $excel->getActiveSheet()->getColumnDimension('H')->setWidth('18');
                     $excel->getActiveSheet()->getColumnDimension('I')->setWidth('18');
+                    $excel->getActiveSheet()->getColumnDimension('J')->setWidth('18');
 
                     $excel->getActiveSheet()->setCellValue('A9','Account #')
                                             ->getStyle('A9')->getFont()->setBold(TRUE);
                     $excel->getActiveSheet()->setCellValue('B9','Customer Name')
                                             ->getStyle('B9')->getFont()->setBold(TRUE);
-                    $excel->getActiveSheet()->setCellValue('C9','Serial No')
+                    $excel->getActiveSheet()->setCellValue('C9','Address')
                                             ->getStyle('C9')->getFont()->setBold(TRUE);
-                    $excel->getActiveSheet()->setCellValue('D9','Total Consumption')
+                    $excel->getActiveSheet()->setCellValue('D9','Serial No')
                                             ->getStyle('D9')->getFont()->setBold(TRUE);
-                    $excel->getActiveSheet()->setCellValue('E9','Amount Due')
+                    $excel->getActiveSheet()->setCellValue('E9','Total Consumption')
                                             ->getStyle('E9')->getFont()->setBold(TRUE);
-                    $excel->getActiveSheet()->setCellValue('F9','Previous Balance')
+                    $excel->getActiveSheet()->setCellValue('F9','Amount Due')
                                             ->getStyle('F9')->getFont()->setBold(TRUE);
-                    $excel->getActiveSheet()->setCellValue('G9','Arrears Penalty')
+                    $excel->getActiveSheet()->setCellValue('G9','Previous Balance')
                                             ->getStyle('G9')->getFont()->setBold(TRUE);
-                    $excel->getActiveSheet()->setCellValue('H9','Charges')
+                    $excel->getActiveSheet()->setCellValue('H9','Arrears Penalty')
                                             ->getStyle('H9')->getFont()->setBold(TRUE);
-                    $excel->getActiveSheet()->setCellValue('I9','Grand Total')
+                    $excel->getActiveSheet()->setCellValue('I9','Charges')
                                             ->getStyle('I9')->getFont()->setBold(TRUE);
+                    $excel->getActiveSheet()->setCellValue('J9','Grand Total')
+                                            ->getStyle('J9')->getFont()->setBold(TRUE);
 
                 $i=10;
                 $total = 0;
@@ -6798,40 +6801,41 @@ class Templates extends CORE_Controller {
                     $total += $billing->grand_total_amount_label_for_report;
 
                     $excel->getActiveSheet()
-                            ->getStyle('A'.$i.':C'.$i)
+                            ->getStyle('A'.$i.':D'.$i)
                             ->getAlignment()
                             ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 
                     $excel->getActiveSheet()
-                            ->getStyle('D'.$i.':I'.$i)
+                            ->getStyle('E'.$i.':J'.$i)
                             ->getAlignment()
                             ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT); 
 
                         $excel->getActiveSheet()->setCellValue('A'.$i,$billing->account_no);
                         $excel->getActiveSheet()->setCellValue('B'.$i,$billing->receipt_name);
-                        $excel->getActiveSheet()->setCellValue('C'.$i,$billing->serial_no);
-                        $excel->getActiveSheet()->setCellValue('D'.$i,$billing->total_consumption);
-                        $excel->getActiveSheet()->setCellValue('E'.$i,$billing->amount_due);
-                        $excel->getActiveSheet()->setCellValue('F'.$i,$billing->previous_balance);
-                        $excel->getActiveSheet()->setCellValue('G'.$i,$billing->arrears_penalty_amount);
-                        $excel->getActiveSheet()->setCellValue('H'.$i,$billing->charges_amount);
-                        $excel->getActiveSheet()->setCellValue('I'.$i,$billing->grand_total_amount_label_for_report);
+                        $excel->getActiveSheet()->setCellValue('C'.$i,$billing->address);
+                        $excel->getActiveSheet()->setCellValue('D'.$i,$billing->serial_no);
+                        $excel->getActiveSheet()->setCellValue('E'.$i,$billing->total_consumption);
+                        $excel->getActiveSheet()->setCellValue('F'.$i,$billing->amount_due);
+                        $excel->getActiveSheet()->setCellValue('G'.$i,$billing->previous_balance);
+                        $excel->getActiveSheet()->setCellValue('H'.$i,$billing->arrears_penalty_amount);
+                        $excel->getActiveSheet()->setCellValue('I'.$i,$billing->charges_amount);
+                        $excel->getActiveSheet()->setCellValue('J'.$i,$billing->grand_total_amount_label_for_report);
             
                 $i++;
 
                 }
 
                 $excel->getActiveSheet()
-                    ->getStyle('H'.$i.':I'.$i)
+                    ->getStyle('I'.$i.':J'.$i)
                     ->getAlignment()
                     ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT); 
 
                 $last_row = count($billings) + 9;
-                $excel->getActiveSheet()->setCellValue('H'.$i, "Total")
-                                        ->getStyle('H'.$i)->getFont()->setBold(TRUE);
-
-                $excel->getActiveSheet()->setCellValue('I'.$i, "=SUM(I10:I".$last_row.")")
+                $excel->getActiveSheet()->setCellValue('I'.$i, "Total")
                                         ->getStyle('I'.$i)->getFont()->setBold(TRUE);
+
+                $excel->getActiveSheet()->setCellValue('J'.$i, "=SUM(J10:J".$last_row.")")
+                                        ->getStyle('J'.$i)->getFont()->setBold(TRUE);
 
                 $i++; $i++;
                 $excel->getActiveSheet()->setCellValue('A'.$i,'Date Printed: '.date('Y-m-d h:i:s'));

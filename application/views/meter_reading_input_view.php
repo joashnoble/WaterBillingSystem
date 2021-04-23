@@ -91,6 +91,14 @@
         #tbl_meter_input_filter{
                 display: none;
         }
+        button[name="update_item"] {
+            font-size: 15px!important;
+            padding-top: 6px!important;
+            padding-right: 10px!important;
+            padding-bottom: 6px!important;
+            padding-left: 10px!important;
+        }
+
     </style>
 </head>
 
@@ -206,7 +214,7 @@
                             <th style="text-align: right;width: 7%;">Previous</th>
                             <th style="text-align: right;width: 7%;">Current</th>
                             <th style="text-align: right;width: 7%;">Consumption</th>
-                            <th style="width: 5%"><center>Action</center></th>
+                            <th style="width: 10%"><center>Action</center></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -270,7 +278,23 @@
     </div>
 </div><!---modal-->
 
-
+<div id="modal_update_item" class="modal fade" tabindex="-1" role="dialog"><!--modal-->
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header ">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                <h4 class="modal-title" style="color:white;"><span id="modal_mode"> </span>Confirm Update</h4>
+            </div>
+            <div class="modal-body">
+                <p id="modal-body-message">Are you sure you want to update this reading?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="btn_update_item" type="button" class="btn btn-success" data-dismiss="modal" style="text-transform: capitalize;font-family: Tahoma, Georgia, Serif;">Yes</button>
+                <button id="btn_close" type="button" class="btn btn-default" data-dismiss="modal" style="text-transform: capitalize;font-family: Tahoma, Georgia, Serif;">No</button>
+            </div>
+        </div>
+    </div>
+</div><!---modal-->
 
 <footer role="contentinfo">
     <div class="clearfix">
@@ -311,6 +335,10 @@
 <script>
 $(document).ready(function(){
     var dt; var _txnMode; var _selectedID; var _selectRowObj; var _cboPeriod; var meterins; var _meter_reading_input_id_for_validation;
+    var _id;
+    var _current_reading;
+    var _total_consumption;
+
     var yearNow = new Date().getFullYear();
     var monthNow = new Date().getMonth() + 1;
     var _currentMeterPeriod;
@@ -416,7 +444,6 @@ $(document).ready(function(){
                 return;
             }
 
-
             $('#tbl_items > tbody').append(newRowItem({
                 connection_id : suggestion.connection_id,
                 account_no : suggestion.account_no,
@@ -425,7 +452,12 @@ $(document).ready(function(){
                 previous_month : suggestion.previous_month,
                 previous_reading : suggestion.previous_reading,
                 current_reading : '',
-                total_consumption : 0
+                total_consumption : 0,
+                payment_count : 0,
+                meter_reading_input_item_id : 0,
+                btnRemoveAttr: "",
+                btnUpdateAttr: "hidden",
+                inputCurrentAttr: ""
             }));
             reInitializeNumeric();
             // $('#tbl_items > tbody > tr:last').find('.current').val('').focus();
@@ -540,10 +572,11 @@ $(document).ready(function(){
             
                 if(data.length > 0){
                     showNotification({title:"Active Payment !",stat:"info",msg:"There is an active payment for this Meter Reading."});
-                    $('#btn_save').attr('disabled', true);
-                }else{
-                    $('#btn_save').attr('disabled', false);
+                    // $('#btn_save').attr('disabled', true);
                 }
+                // else{
+                //     $('#btn_save').attr('disabled', false);
+                // }
 
             });
 
@@ -563,6 +596,16 @@ $(document).ready(function(){
 
                     $.each(rows,function(i,value){
 
+                        var btnRemoveAttr = "";
+                        var btnUpdateAttr = "";
+                        var inputCurrentAttr = "";
+
+                        if (value.payment_count > 0){
+                            btnRemoveAttr = "hidden";
+                            btnUpdateAttr = "hidden";
+                            inputCurrentAttr = "readonly";
+                        }
+
                         $('#tbl_items > tbody').append(newRowItem({
                             connection_id : value.connection_id,
                             account_no : value.account_no,
@@ -571,7 +614,13 @@ $(document).ready(function(){
                             previous_month : value.previous_month,
                             previous_reading : value.previous_reading,
                             current_reading : value.current_reading,
-                            total_consumption : value.total_consumption
+                            total_consumption : value.total_consumption,
+                            meter_reading_input_item_id : value.meter_reading_input_item_id,
+                            payment_count : value.payment_count,
+                            btnRemoveAttr : btnRemoveAttr,
+                            btnUpdateAttr : btnUpdateAttr,
+                            inputCurrentAttr : inputCurrentAttr
+
                         }));
 
                     });
@@ -696,6 +745,29 @@ $(document).ready(function(){
         });
 
 
+        $('#tbl_items > tbody').on('click','button[name="update_item"]',function(){
+            _id = $(this).data('id');
+            var row = $(this).closest('tr');
+
+            _current_reading=parseFloat(accounting.unformat(row.find(oTableItems.current_reading).find('input.number').val()));
+            _total_consumption=parseFloat(accounting.unformat(row.find(oTableItems.total_consumption).find('input.number').val()));    
+            $('#modal_update_item').modal('show');
+
+        });
+
+
+        $('#btn_update_item').on('click', function(){
+            updateMeterReading(_id,_current_reading,_total_consumption).done(function(response){
+
+                if(response.stat=="success"){
+                    showNotification(response);
+                    clearFields($('#frm_meter_reading_input'));
+                    showList(true);
+                }
+
+            });
+        });
+
     })();
     var validateRequiredFields=function(f){
         var stat=true;
@@ -771,6 +843,21 @@ $(document).ready(function(){
             "beforeSend": showSpinningProgress($('#btn_save'))
         });
     };
+
+    var updateMeterReading=function(id, current_reading, total_consumption){
+        var _data=$('#').serializeArray();
+        _data.push({name : "meter_reading_input_item_id" ,value : id});
+        _data.push({name : "current_reading" ,value : current_reading});
+        _data.push({name : "total_consumption" ,value : total_consumption});
+
+        return $.ajax({
+            "dataType":"json",
+            "type":"POST",
+            "url":"Meter_reading_input/transaction/update-reading",
+            "data":_data
+        });
+    };
+
     var removeMeterInput=function(){
         return $.ajax({
             "dataType":"json",
@@ -878,6 +965,7 @@ $(document).ready(function(){
     var getFloat=function(f){
         return parseFloat(accounting.unformat(f));
     };
+
     var newRowItem=function(d){
         return '<tr>'+
         '<td style="display:none;"><input name="connection_id[]" type="text" class="number form-control conn" value="'+d.connection_id+'" style="text-align:right;" readonly></td>'+
@@ -886,9 +974,9 @@ $(document).ready(function(){
         '<td><input type="text" class="form-control" value="'+d.serial_no +'" readonly></td>'+
         '<td><input type="text" name="previous_month[]" class="form-control" value="'+d.previous_month +'" readonly></td>'+
         '<td><input type="text" name="previous_reading[]" class="number form-control" value="'+ d.previous_reading+'" style="text-align:right;" readonly></td>'+
-        '<td><input type="text" name="current_reading[]" class="number form-control current" value="'+ d.current_reading+'" style="text-align:right;"></td>'+
+        '<td><input type="text" name="current_reading[]" class="number form-control current" value="'+ d.current_reading+'" style="text-align:right;" '+d.inputCurrentAttr+'></td>'+
         '<td><input type="text" name="total_consumption[]" class="number form-control" value="'+ d.total_consumption+'" style="text-align:right;" readonly></td>'+
-        '<td align="center"><button type="button" name="remove_item" class="btn btn-red"><i class="fa fa-trash"></i></button></td>'+
+        '<td align="center"><button type="button" name="update_item" data-id="'+d.meter_reading_input_item_id+'" class="btn btn-success '+d.btnUpdateAttr+'"><i class="fa fa-save"></i></button><button type="button" name="remove_item" class="btn btn-red '+d.btnRemoveAttr+'"><i class="fa fa-trash"></i></button></td>'+
         '</tr>';
     };
 

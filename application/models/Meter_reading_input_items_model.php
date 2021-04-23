@@ -9,6 +9,18 @@ class Meter_reading_input_items_model extends CORE_Model {
         parent::__construct();
     }
 
+    function get_reading($meter_reading_input_item_id){
+    	$sql="SELECT 
+		    mrii.connection_id,
+		    mrii.meter_reading_input_id,
+		    mri.meter_reading_period_id
+		FROM
+		    meter_reading_input_items mrii
+		    LEFT JOIN meter_reading_input mri ON mri.meter_reading_input_id = mrii.meter_reading_input_id
+		    WHERE mri.is_deleted = FALSE AND mri.is_active = TRUE AND
+		    mrii.meter_reading_input_item_id = ".$meter_reading_input_item_id;
+        return $this->db->query($sql)->result();
+    }
 
     function validate_duplication($connection_id,$meter_reading_period_id,$meter_reading_input_id){
         $sql="SELECT 

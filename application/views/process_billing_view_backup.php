@@ -118,67 +118,32 @@
                                                         <label> End Date :</label> <br />
                                                         <input type="text"  class="form-control" id="end_date" readonly>
                                                     </div>
-                                                    <div class="col-lg-4">
+                                                    <div class="col-lg-offset-1 col-lg-3">
                                                         <label>  Search :</label> <br />
                                                         <input type="text" id="searchbox_reading" class="form-control">
                                                     </div>
                                                 </div>
                                                 <div class="row">
-                                                    <div class="col-lg-2">
-                                                        <label> Batch No :</label> <br />
-                                                        <select name="meter_reading_input_id" id="cbo_meter_reading_input" data-error-msg="Meter Reading Period is required." required style="width: 100%;">
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-lg-2">
-                                                        <label> Payment :</label> <br />
-                                                        <select class="form-control" id="cbo_payment_count" style="width: 100%;">
-                                                            <option value="0">All</option>
-                                                            <option value="1">Active Payment</option>
-                                                            <option value="2">No Payment</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-lg-2">
-                                                        <label> Process Type :</label> <br />
-                                                        <select class="form-control" id="cbo_process" style="width: 100%;">
-                                                            <option value="0">All</option>
-                                                            <option value="1">Processed</option>
-                                                            <option value="2">Nonprocessed</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-lg-2">
+                                                <div class="col-lg-offset-6 col-lg-3">
                                                         <br>
-                                                        <button id="btn_refresh" class="btn btn-success" style="margin-top: 1px;">
-                                                            <i class="fa fa-refresh"></i>
-                                                        </button>
                                                         <input type="checkbox" class="css-checkbox" name="select_all" id="select_all" style="width: 10px!important;height: 10px!important;">
                                                         <label for="select_all" class="css-label">Select All</label>
                                                     </div>
-                                                    <div class="col-lg-2">
+                                                    <div class="col-lg-3">
                                                         <br>
                                                         <button class="btn btn-primary btn_process_billing" id="btn_process" style="width: 100%;">
                                                             <i class="fa fa-check-circle"></i>
                                                             <span>Process</span>
                                                         </button>
                                                     </div>
-                                                    <div class="col-lg-2">
-                                                        <br>
-                                                        <button class="btn btn-danger" id="btn_remove_billing" style="width: 100%;">
-                                                            <i class="fa fa-times-circle"></i>
-                                                            <span>Remove</span>
-                                                        </button>
-                                                    </div>
                                                 </div><br>
                                                 <table id="tbl_process_billing" class="table table-striped" cellspacing="0" width="100%">
                                                     <thead>
                                                         <tr>
-                                                            <th width="10%">Batch No</th>
-                                                            <th width="15%">Account No</th>
-                                                            <th width="25%">Customer Name</th>
-                                                            <th>Meter Serial</th>
-                                                            <th>Previous Month</th>
-                                                            <th>Previous</th>
-                                                            <th>Current</th>
-                                                            <th>Consumption</th>
+                                                            <th></th>
+                                                            <th>Batch No</th>
+                                                            <th>Input Date</th>
+                                                            <th>Created By</th>
                                                             <th><center>Processed</center></th>
                                                             <th><center>Action</center></th>
                                                         </tr>
@@ -213,27 +178,6 @@
                     </div>
                 </div>
             </div><!---modal-->
-
-            <div id="modal_confirmation_cancel" class="modal fade" tabindex="-1" role="dialog"><!--modal-->
-                <div class="modal-dialog modal-sm">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
-                            <h4 class="modal-title" style="color:white;"><span id="modal_mode"> </span>Confirm Cancellation of Billing</h4>
-                        </div>
-
-                        <div class="modal-body">
-                            <p id="modal-body-message">Are you sure you want to cancel this billing?</p>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button id="btn_yes_cancel" type="button" class="btn btn-success" data-dismiss="modal">Yes</button>
-                            <button id="btn_close" type="button" class="btn btn-default" data-dismiss="modal">No</button>
-                        </div>
-                    </div>
-                </div>
-            </div><!---modal-->
-
             <footer role="contentinfo">
                 <div class="clearfix">
                     <ul class="list-unstyled list-inline pull-left">
@@ -263,7 +207,7 @@
 <script>
 
 $(document).ready(function(){
-    var dt; var _txnMode; var _selectedID; var _selectRowObj; var _cboBatchNo; var _cboPayment; var _cboProcess;
+    var dt; var _txnMode; var _selectedID; var _selectRowObj;
 
     var initializeControls=function(){
 
@@ -274,30 +218,8 @@ $(document).ready(function(){
 
         _cboPeriod.select2('val',0);
 
-        _cboBatchNo=$("#cbo_meter_reading_input").select2({
-            placeholder: "Please Select Batch No.",
-            allowClear: false
-        });
-
-        _cboBatchNo.select2('val',0);
-
-        _cboPayment=$("#cbo_payment_count").select2({
-            placeholder: "Please Select",
-            allowClear: false
-        });
-
-        _cboPayment.select2('val',0);
-
-        _cboProcess=$("#cbo_process").select2({
-            placeholder: "Please Select",
-            allowClear: false
-        });
-
-        _cboProcess.select2('val',0);
-
         dt=$('#tbl_process_billing').DataTable({
             "bLengthChange":false,
-            "bPaginate": false,
             oLanguage: {
                     sProcessing: '<center><br /><img src="assets/img/loader/ajax-loader-sm.gif" /><br /><br /></center>'
             },
@@ -307,24 +229,23 @@ $(document).ready(function(){
                 "bDestroy": true,            
                 "data": function ( d ) {
                         return $.extend( {}, d, {
-                            "period_id": $('#cbo_period').val(),
-                            "meter_reading_input_id": $('#cbo_meter_reading_input').val(),
-                            "payment_type": $('#cbo_payment_count').val(),
-                            "process_type": $('#cbo_process').val()
+                            "period_id": $('#cbo_period').val()
                         });
                     }
             }, 
             "columns": [
-                { targets:[0],data: "batch_no" },
-                { targets:[1],data: "account_no" },
-                { targets:[2],data: "receipt_name" },
-                { targets:[3],data: "serial_no" },
-                { targets:[4],data: "previous_month" },
-                { sClass:"text-right", targets:[5],data: "previous_reading" },
-                { sClass:"text-right", targets:[6],data: "current_reading" },
-                { sClass:"text-right", targets:[7],data: "total_consumption" },
                 {
-                    targets:[8],data: null,
+                    "targets": [0],
+                    "class":          "details-control",
+                    "orderable":      false,
+                    "data":           null,
+                    "defaultContent": ""
+                },
+                { targets:[0],data: "batch_no" },
+                { targets:[1],data: "date_input" },
+                { targets:[2],data: "posted_by" },
+                {
+                    targets:[3],data: null,
                     render: function (data, type, full, meta){
                         var _attribute='';
                         if(data.is_processed=="1"){
@@ -337,9 +258,9 @@ $(document).ready(function(){
                     }
                 },
                 {
-                    targets:[9],data: null,
+                    targets:[4],data: null,
                     render: function (data, type, full, meta){
-                        var checkbox='<input type="checkbox" class="css-checkbox btch_chckbx" name="meter_reading_input_item_id[]" value="'+data.meter_reading_input_item_id+'" id="'+data.meter_reading_input_item_id+'"><label for="'+data.meter_reading_input_item_id+'" class="css-label "></label> ';
+                        var checkbox='<input type="checkbox" class="css-checkbox btch_chckbx" name="meter_reading_input_id[]" value="'+data.meter_reading_input_id+'" id="'+data.meter_reading_input_id+'"><label for="'+data.meter_reading_input_id+'" class="css-label "></label> ';
                         
                         if(data.payment_count <= 0){
                             return '<center>'+checkbox+'</center>';
@@ -476,45 +397,7 @@ $(document).ready(function(){
             $('#start_date').val(obj_period.data('start'));
             $('#end_date').val(obj_period.data('end'));
 
-            batches(i).done(function(response){
-                var rows = response.data;
-
-                $("#cbo_meter_reading_input option").remove();
-                _cboBatchNo.select2('val',null);
-
-                if (rows.length > 0){
-                    $("#cbo_meter_reading_input").append('<option value="0">All</option>');
-                    $.each(rows,function(i,value){
-                       $("#cbo_meter_reading_input").append('<option value="'+ value.meter_reading_input_id +'">'+ value.batch_no +'</option>');
-                    });
-                    
-                    $('#cbo_meter_reading_input').val("").trigger("change")
-                    _cboBatchNo.select2('val',0);
-                }
-
-            });
-
-            $('#tbl_process_billing tbody').html('<tr><td colspan="10"><center><br/><br /><br /></center></td></tr>');
-            dt.ajax.reload( null, false );
-        });
-
-        _cboBatchNo.on('select2:select', function(){
-            $('#tbl_process_billing tbody').html('<tr><td colspan="10"><center><br/><br /><br /></center></td></tr>');
-            dt.ajax.reload( null, false );
-        });
-
-        _cboPayment.on('select2:select', function(){
-            $('#tbl_process_billing tbody').html('<tr><td colspan="10"><center><br/><br /><br /></center></td></tr>');
-            dt.ajax.reload( null, false );
-        });
-
-        _cboProcess.on('select2:select', function(){
-            $('#tbl_process_billing tbody').html('<tr><td colspan="10"><center><br/><br /><br /></center></td></tr>');
-            dt.ajax.reload( null, false );
-        });
-
-        $('#btn_refresh').on('click', function(){
-            $('#tbl_process_billing tbody').html('<tr><td colspan="10"><center><br/><br /><br /></center></td></tr>');
+            $('#tbl_process_billing tbody').html('<tr><td colspan="7"><center><br/><br /><br /></center></td></tr>');
             dt.ajax.reload( null, false );
         });
 
@@ -527,18 +410,6 @@ $(document).ready(function(){
                 }
             }).always(function(){
                 showSpinningProgress($('#btn_process'));
-            });
-        });
-
-        $('#btn_remove_billing').on('click',function(){
-            check_billing().done(function(response){
-                if(response.stat == "success"){
-                    $('#modal_confirmation_cancel').modal('show');
-                }else{   
-                    showNotification(response);
-                }
-            }).always(function(){
-                showSpinningProgress($('#btn_remove_billing'));
             });
         });
 
@@ -555,26 +426,6 @@ $(document).ready(function(){
                 $('#btn_process').attr('disabled',false);
             });
         });
-
-        $('#btn_yes_cancel').click(function(){
-            $('#btn_remove_billing').attr('disabled',true);
-            $("#btn_remove_billing span").text('Removing');
-
-            cancel_billing().done(function(response){
-
-                showNotification(response);
-                $('#select_all').prop('checked', false);
-                dt.ajax.reload( null, false );
-
-            }).always(function(){
-
-                showSpinningProgress($('#btn_remove_billing'));
-                $("#btn_remove_billing span").text('Remove ');
-                $('#btn_remove_billing').attr('disabled',false);
-
-            });
-        });
-
 
         $('#btn_save').click(function(){
             if(validateRequiredFields($('#frm_reconnection'))){
@@ -642,18 +493,6 @@ $(document).ready(function(){
         });
     };
 
-    var batches=function(i){
-        var _data=$('#').serializeArray();
-        _data.push({name : "period_id" ,value : i});
-
-        return $.ajax({
-            "dataType":"json",
-            "type":"POST",
-            "url":"Billing_statement/transaction/get_batches",
-            "data":_data
-        });
-    };
-
     var process_billing=function(){
         var _data = dt.$('input, select').serialize();
         var period_id = $('#cbo_period').val();
@@ -666,17 +505,6 @@ $(document).ready(function(){
         });
     };
 
-    var cancel_billing=function(){
-        var _data = dt.$('input, select').serialize();
-        return $.ajax({
-            "dataType":"json",
-            "type":"POST",
-            "url":"Process_billing/transaction/cancel",
-            "data":_data,
-            "beforeSend": showSpinningProgress($('#btn_remove_billing'))
-        });
-    };    
-
     var check_process=function(){
         var _data = dt.$('input, select').serialize();
         return $.ajax({
@@ -685,17 +513,6 @@ $(document).ready(function(){
             "url":"Process_billing/transaction/check_process",
             "data":_data,
             "beforeSend": showSpinningProgress($('#btn_process'))
-        });
-    };    
-
-    var check_billing=function(){
-        var _data = dt.$('input, select').serialize();
-        return $.ajax({
-            "dataType":"json",
-            "type":"POST",
-            "url":"Process_billing/transaction/check_billing",
-            "data":_data,
-            "beforeSend": showSpinningProgress($('#btn_remove_billing'))
         });
     };    
 

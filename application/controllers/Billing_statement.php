@@ -59,7 +59,7 @@ class Billing_statement extends CORE_Controller {
                 $m_batches = $this->Meter_reading_input_model;
                 $period_id = $this->input->post('period_id',TRUE);
 
-                $response['data'] = $m_batches->meter_reading($period_id);
+                $response['data'] = $m_batches->get_batches($period_id);
                 echo json_encode($response);
                 break;
 

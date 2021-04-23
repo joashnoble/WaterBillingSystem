@@ -12,43 +12,6 @@ class Billing_model extends CORE_Model{
         parent::__construct();
     }
 
-    function get_billing($connection_id,$meter_reading_input_id,$meter_reading_period_id){
-    	$sql="SELECT 
-		    b.billing_id
-		FROM
-		    billing b
-		    WHERE b.connection_id = $connection_id AND
-		    b.meter_reading_input_id = $meter_reading_input_id AND
-		    b.meter_reading_period_id = $meter_reading_period_id";
-		return $this->db->query($sql)->result();
-    }
-
-    function remove_billing($billing_id){
-        $this->db->where('billing_id', $billing_id);
-        $this->db->delete('billing');
-
-		$check_existing_billing_scharges = $this->db->query("SELECT bc.other_charge_id FROM
-					    billing_charges bc WHERE bc.billing_id=".$billing_id);
-		$billing_charges = $check_existing_billing_scharges->result();
-
-		if ($check_existing_billing_scharges->num_rows() != 0){
-
-			// Update Processed Status of Other Charges
-			foreach($billing_charges as $bc){
-            	$update_charges = "UPDATE other_charges SET is_processed=0 WHERE other_charge_id=".$bc->other_charge_id;
-               	$this->db->query($update_charges);
-			}
-
-			// Delete current billing charges
-			foreach($billing_charges as $bc){
-                $other_charge_id = $bc->other_charge_id;
-                $this->db->where('other_charge_id', $other_charge_id);
-                $this->db->delete('billing_charges');
-			}
-
-		}
-    }
-
     function get_customer_billing_receivables($type_id){
     	$sql = "SELECT
     				main.*,metin.serial_no
@@ -419,40 +382,27 @@ class Billing_model extends CORE_Model{
     	return $query->result();
     }
 
-    function process_billing($meter_reading_input_item_id) {
+    function process_billing($meter_reading_input_id) {
 
-    	foreach($meter_reading_input_item_id as $id){
+    	foreach($meter_reading_input_id as $id){
 
-    		$meter_reading = $this->db->query("SELECT mrii.connection_id, 
-    				mri.meter_reading_input_id, 
-    				mri.meter_reading_period_id 
-    			FROM meter_reading_input mri
-    			LEFT JOIN meter_reading_input_items mrii 
-    			ON mrii.meter_reading_input_id = mri.meter_reading_input_id
-    			WHERE meter_reading_input_item_id = ".$id);
-    		$mreading = $meter_reading->result();
     		$total_amount_due = 0;
 
     		// Check if billing is existing
-    		$check_existing_billing = $this->db->query("SELECT * FROM billing 
-    			WHERE 
-    			connection_id = ".$mreading[0]->connection_id." AND 
-    			meter_reading_input_id = ".$mreading[0]->meter_reading_input_id." AND 
-    			meter_reading_period_id = ".$mreading[0]->meter_reading_period_id."");
+    		$check_existing_billing = $this->db->query("SELECT * FROM billing WHERE meter_reading_input_id =".$id);
             $billing = $check_existing_billing->result();
             $exist = 0;
-            $billing_id = 0;
 
             //deleting current billing based on id
             if ($check_existing_billing->num_rows() != 0) {
                 $exist = 1;
-                $billing_id = $billing[0]->billing_id;
-                $this->db->where('billing_id', $billing_id);
+                $input_id = $billing[0]->meter_reading_input_id;
+                $this->db->where('meter_reading_input_id', $input_id);
                 $this->db->delete('billing');
             }
 
     		$check_existing_billing_scharges = $this->db->query("SELECT bc.other_charge_id FROM
-						    billing_charges bc WHERE bc.billing_id=".$billing_id);
+						    billing_charges bc WHERE bc.meter_reading_input_id=".$id);
     		$billing_charges = $check_existing_billing_scharges->result();
 
     		if ($check_existing_billing_scharges->num_rows() != 0){
@@ -545,8 +495,7 @@ class Billing_model extends CORE_Model{
 					            END) AS is_fixed_amount								
 					    FROM
 					        (SELECT 
-        					mrii.meter_reading_input_item_id,
-					        	mrii.connection_id,
+					        mrii.connection_id,
 					            mrii.previous_reading,
 					            mrii.current_reading,
 					            mrii.total_consumption,
@@ -569,7 +518,7 @@ class Billing_model extends CORE_Model{
 					    LEFT JOIN meter_reading_period mrp ON mrp.meter_reading_period_id = mri.meter_reading_period_id
 					    WHERE
 					        mri.is_deleted = FALSE
-					        AND mrii.meter_reading_input_item_id = ".$id.") AS x) AS z");
+					        AND mri.meter_reading_input_id = ".$id.") AS x) AS z");
     		$reading = $meter_reading_input->result();
 
 
@@ -805,8 +754,8 @@ class Billing_model extends CORE_Model{
 
 					  ) as main
 					"); 
-					$arrears_amount_result = $arrears_amount_info->result();
-					$arrears_amount = $arrears_amount_result[0]->arrears_amount - $arrears_penalty_amount;
+				$arrears_amount_result = $arrears_amount_info->result();
+				$arrears_amount = $arrears_amount_result[0]->arrears_amount - $arrears_penalty_amount;
 
     			}
 			
@@ -845,7 +794,7 @@ class Billing_model extends CORE_Model{
             	$update_billing = "UPDATE billing SET control_no='".$control_no."' WHERE billing_id=".$billing_id;
                	$this->db->query($update_billing);
 
-            	$update = "UPDATE meter_reading_input_items SET is_processed=TRUE WHERE meter_reading_input_item_id=".$row->meter_reading_input_item_id;
+            	$update = "UPDATE meter_reading_input SET is_processed=1 WHERE meter_reading_input_id=".$row->meter_reading_input_id;
                	$this->db->query($update);
 
                	$other_charges = $this->db->query("SELECT 

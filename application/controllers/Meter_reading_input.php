@@ -122,6 +122,7 @@ class Meter_reading_input extends CORE_Controller
                 $response['data']=$m_items->get_list(
                     array('meter_reading_input_id'=>$id_filter),
                     array(
+                        'meter_reading_input_items.meter_reading_input_item_id',
                         'meter_reading_input_items.connection_id',
                         'meter_reading_input_items.previous_reading',
                         'meter_reading_input_items.current_reading',
@@ -130,7 +131,17 @@ class Meter_reading_input extends CORE_Controller
                         'service_connection.account_no',
                         'service_connection.receipt_name',
                         'customers.customer_name',
-                        'meter_inventory.serial_no'
+                        'meter_inventory.serial_no',
+                        '(SELECT 
+                            count(*)
+                        FROM
+                            billing_payment_items bpi
+                            LEFT JOIN billing_payments bp ON bp.billing_payment_id = bpi.billing_payment_id
+                            LEFT JOIN billing b ON b.billing_id = bpi.billing_id
+                            WHERE b.connection_id = meter_reading_input_items.connection_id AND
+                            b.meter_reading_input_id = meter_reading_input_items.meter_reading_input_id
+                            AND bp.is_active = TRUE
+                            AND bp.is_deleted = FALSE) as payment_count'
                     ),
                     array(
                         array('service_connection','service_connection.connection_id=meter_reading_input_items.connection_id','left'),
@@ -209,6 +220,22 @@ class Meter_reading_input extends CORE_Controller
 
                 break;
 
+            case 'update-reading':
+                $m_reading_items = $this->Meter_reading_input_items_model;
+                $meter_reading_input_item_id = $this->input->post('meter_reading_input_item_id', TRUE);
+                $current_reading = $this->input->post('current_reading');
+                $total_consumption = $this->input->post('total_consumption');
+
+                $m_reading_items->current_reading = $this->get_numeric_value($current_reading);
+                $m_reading_items->total_consumption = $this->get_numeric_value($total_consumption);
+                $m_reading_items->is_processed = FALSE;
+                $m_reading_items->modify($meter_reading_input_item_id);
+
+                $response['title'] = 'Success!';
+                $response['stat'] = 'success';
+                $response['msg'] = 'Meter Reading successfully updated.';
+                echo json_encode($response);
+                break;
 
             case 'update-batch':
                 $m_invoice=$this->Meter_reading_input_model;

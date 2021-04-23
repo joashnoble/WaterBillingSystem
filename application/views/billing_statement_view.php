@@ -156,7 +156,7 @@
                                                             <i class="fa fa-file-excel-o"></i> Export
                                                         </button>
 
-                                                        <button type="button" class="btn btn-success" id="update_report" style="width: 100%;margin-top: 5px;">
+                                                        <button type="button" class="btn btn-success hidden" id="update_report" style="width: 100%;margin-top: 5px;">
                                                             <i class="fa fa-refresh"></i> Update Billing Statement
                                                         </button>
 

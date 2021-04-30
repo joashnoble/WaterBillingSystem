@@ -26,7 +26,7 @@ class Meter_reading_period_model extends CORE_Model {
 			(SELECT 
 			connection_id,
 			applicable_month,
-			current_reading
+			MAX(current_reading) as current_reading
 			 FROM 
 
 			(SELECT 
@@ -45,7 +45,10 @@ class Meter_reading_period_model extends CORE_Model {
 			
 			SELECT 
 			sd.connection_id,
-			DATE(sd.date_disconnection_date) as applicable_month,
+			-- DATE(sd.date_disconnection_date) as applicable_month,
+
+			DATE_SUB(DATE(CONCAT(YEAR(sd.date_disconnection_date),  "-", MONTH(sd.date_disconnection_date), "-01")), INTERVAL 1 MONTH) as applicable_month,
+
 			sd.last_meter_reading as current_reading FROM 
 
 			service_disconnection sd 
@@ -65,6 +68,7 @@ class Meter_reading_period_model extends CORE_Model {
 			 
 			 '.($before_date==null?'':'WHERE applicable_month < DATE("'.$before_date.'")').'
 			
+            GROUP BY applicable_month, connection_id
 			ORDER BY connection_id ASC,applicable_month ASC)  as n
 
 			LEFT OUTER JOIN 
@@ -72,7 +76,7 @@ class Meter_reading_period_model extends CORE_Model {
 			(SELECT 
 			connection_id,
 			applicable_month,
-			current_reading
+			MAX(current_reading) as current_reading
 			 FROM 
 
 			(SELECT 
@@ -91,7 +95,8 @@ class Meter_reading_period_model extends CORE_Model {
 
 			SELECT 
 			sd.connection_id,
-			DATE(sd.date_disconnection_date) as applicable_month,
+			-- DATE(sd.date_disconnection_date) as applicable_month,
+			DATE_SUB(DATE(CONCAT(YEAR(sd.date_disconnection_date),  "-", MONTH(sd.date_disconnection_date), "-01")), INTERVAL 1 MONTH) as applicable_month,
 			sd.last_meter_reading as current_reading FROM 
 
 			service_disconnection sd 
@@ -111,6 +116,8 @@ class Meter_reading_period_model extends CORE_Model {
 			 as main
 			 
 			'.($before_date==null?'':'WHERE applicable_month < DATE("'.$before_date.'")').'
+
+            GROUP BY applicable_month, connection_id
 			ORDER BY connection_id ASC,applicable_month ASC) as o
 
 			on (n.connection_id = o.connection_id and n.applicable_month < o.applicable_month)

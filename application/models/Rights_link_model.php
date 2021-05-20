@@ -167,7 +167,8 @@ class Rights_link_model extends CORE_Model{
                                           (158,'38','38-1','Send to Accounting Billing'),
                                           (159,'39','39-1','Send to Accounting Payments'),
                                           (160,'21','21-7','Customer Billing Receivables'),
-                                          (161,'21','21-8','Monthly Connection')
+                                          (161,'21','21-8','Monthly Connection'),
+                                          (162,'21','21-9','Penalties Incurred')
 
                                           ON DUPLICATE KEY UPDATE
                                           rights_links.parent_code=VALUES(rights_links.parent_code),

@@ -66,6 +66,7 @@
                             <ul class="acc-menu">
                                 <li class="<?php echo (in_array('21-8',$this->session->user_rights)?'':'hidden'); ?>"><a href="Monthly_connection">Monthly Connection</a></li>
                                 <li class="<?php echo (in_array('21-3',$this->session->user_rights)?'':'hidden'); ?>"><a href="Billing_statement">Billing Statement</a></li>
+                                <li class="<?php echo (in_array('21-9',$this->session->user_rights)?'':'hidden'); ?>"><a href="Penalties_incurred">Penalties Incurred</a></li>
                                 <li class="<?php echo (in_array('21-2',$this->session->user_rights)?'':'hidden'); ?>"><a href="Customer_consumption_history">Consumption History</a></li>
                                 <li class="<?php echo (in_array('21-4',$this->session->user_rights)?'':'hidden'); ?>"><a href="Customer_billing_subsidiary">Customer Billing Subsidiary</a></li>
                                  <li class="<?php echo (in_array('21-7',$this->session->user_rights)?'':'hidden'); ?>"><a href="Customer_billing_receivables">Customer Billing Receivables</a></li> 

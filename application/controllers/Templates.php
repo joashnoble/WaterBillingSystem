@@ -5591,6 +5591,33 @@ class Templates extends CORE_Controller {
 
                         break;
 
+                case 'penalties_incurred':
+                    $m_billing=$this->Billing_model;
+                    $m_company=$this->Company_model;
+                    $m_months=$this->Months_model;
+
+                    $month_id = $filter_value;
+                    $year = $type;
+                    $type=$this->input->get('type',TRUE);
+
+                    $data['infos']=$this->Billing_model->get_penalties_incurred($month_id,$year);
+                    $data['month'] = $m_months->get_list($month_id);
+                    $data['year'] = $year;
+                    $data['company_info'] = $m_company->get_list(1)[0];
+
+                    //preview on browser
+                    if($type=='preview'){
+                        $file_name='Penalties incurred for the month of '.$data['month'][0]->month_name.' '.$year;
+                        $pdfFilePath = $file_name.".pdf"; //generate filename base on id
+                        $pdf = $this->m_pdf->load(); //pass the instance of the mpdf class
+                        $content=$this->load->view('template/penalties_incurred_content',$data,TRUE); //load the template
+                        // $pdf->setFooter('{PAGENO}');
+                        $pdf->WriteHTML($content);
+                        //download it.
+                        $pdf->Output();
+                    }
+
+                    break;
 
                 case 'billing_statement': //Billing Statment
                         $m_billing=$this->Billing_model;
@@ -6697,6 +6724,125 @@ class Templates extends CORE_Controller {
                         }
 
                         break;
+
+            case 'penalties_incurred_export' :
+                
+                $excel=$this->excel;
+                $type=$this->input->get('type',TRUE);
+                $month_id = $this->input->get('month_id',TRUE);
+                $year = $this->input->get('year',TRUE);
+
+                $m_billing=$this->Billing_model;
+                $m_company=$this->Company_model;
+                $m_months=$this->Months_model;
+
+                $month = $m_months->get_list($month_id);
+                $infos=$this->Billing_model->get_penalties_incurred($month_id,$year);
+                $company_info=$m_company->get_list();
+
+                $excel->setActiveSheetIndex(0);
+
+                    $excel->getActiveSheet()->getColumnDimensionByColumn('A1')->setWidth('50');
+                    $excel->getActiveSheet()->getColumnDimensionByColumn('A2:B2')->setWidth('50');
+                    $excel->getActiveSheet()->getColumnDimensionByColumn('A3')->setWidth('50');
+                    $excel->getActiveSheet()->getColumnDimensionByColumn('A4')->setWidth('50');
+                    //name the worksheet
+                    $excel->getActiveSheet()->setTitle($month[0]->month_name.' '.$year);
+                    $excel->getActiveSheet()->getStyle('A1')->getFont()->setBold(TRUE);
+                    $excel->getActiveSheet()->mergeCells('A2:C2');
+                    $excel->getActiveSheet()->setCellValue('A1',$company_info[0]->company_name)
+                                            ->setCellValue('A2',$company_info[0]->company_address)
+                                            ->setCellValue('A3',$company_info[0]->landline.'/'.$company_info[0]->mobile_no)
+                                            ->setCellValue('A4',$company_info[0]->email_address);
+                    
+                    $excel->getActiveSheet()->mergeCells('A6:J6');
+                    $excel->getActiveSheet()->setCellValue('A6','Penalties Incurred for the month of '.$month[0]->month_name.' '.$year)
+                                            ->getStyle('A6')->getFont()->setBold(TRUE);
+
+                    $excel->getActiveSheet()
+                            ->getStyle('A:C')
+                            ->getAlignment()
+                            ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+
+                    $excel->getActiveSheet()
+                            ->getStyle('D')
+                            ->getAlignment()
+                            ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT); 
+
+                    $excel->getActiveSheet()->getColumnDimension('A')->setWidth('20');
+                    $excel->getActiveSheet()->getColumnDimension('B')->setWidth('15');
+                    $excel->getActiveSheet()->getColumnDimension('C')->setWidth('40');
+                    $excel->getActiveSheet()->getColumnDimension('D')->setWidth('15');
+
+                    $excel->getActiveSheet()->setCellValue('A9','Account #')
+                                            ->getStyle('A9')->getFont()->setBold(TRUE);
+                    $excel->getActiveSheet()->setCellValue('B9','Meter Serial')
+                                            ->getStyle('B9')->getFont()->setBold(TRUE);
+                    $excel->getActiveSheet()->setCellValue('C9','Particular')
+                                            ->getStyle('C9')->getFont()->setBold(TRUE);
+                    $excel->getActiveSheet()->setCellValue('D9','Penalty Fee')
+                                            ->getStyle('D9')->getFont()->setBold(TRUE);
+
+                $i=10;
+                $total = 0;
+
+                foreach ($infos as $info){
+                    $total += $info->penalty_fee;
+
+                    $excel->getActiveSheet()
+                            ->getStyle('A'.$i.':C'.$i)
+                            ->getAlignment()
+                            ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+
+                    $excel->getActiveSheet()
+                            ->getStyle('D'.$i)
+                            ->getAlignment()
+                            ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT); 
+
+                        $excel->getActiveSheet()->setCellValue('A'.$i,$info->account_no);
+                        $excel->getActiveSheet()->setCellValue('B'.$i,$info->serial_no);
+                        $excel->getActiveSheet()->setCellValue('C'.$i,$info->receipt_name);
+                        $excel->getActiveSheet()->setCellValue('D'.$i,$info->penalty_fee);
+            
+                $i++;
+
+                }
+
+                $excel->getActiveSheet()
+                    ->getStyle('D'.$i)
+                    ->getAlignment()
+                    ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT); 
+
+                $last_row = count($infos) + 9;
+                $excel->getActiveSheet()->setCellValue('C'.$i, "Total")
+                                        ->getStyle('C'.$i)->getFont()->setBold(TRUE);
+
+                $excel->getActiveSheet()->setCellValue('D'.$i, "=SUM(D10:D".$last_row.")")
+                                        ->getStyle('D'.$i)->getFont()->setBold(TRUE);
+
+                $i++; $i++;
+                $excel->getActiveSheet()->setCellValue('A'.$i,'Date Printed: '.date('Y-m-d h:i:s'));
+                $i++;
+                $excel->getActiveSheet()->setCellValue('A'.$i,'Printed by: '.$this->session->user_fullname);
+
+                $filename = "Penalty Incurred for the month of ".$month[0]->month_name." ".$year;
+
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment;filename='.$filename.".xlsx".'');
+                header('Cache-Control: max-age=0');
+                // If you're serving to IE 9, then the following may be needed
+                header('Cache-Control: max-age=1');
+
+                // If you're serving to IE over SSL, then the following may be needed
+                header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+                header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+                header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+                header ('Pragma: public'); // HTTP/1.0
+
+                $objWriter = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+                $objWriter->save('php://output'); 
+
+                break;
 
             case 'billing_statement_report' :
                 

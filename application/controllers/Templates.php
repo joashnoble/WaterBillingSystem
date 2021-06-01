@@ -1,4 +1,6 @@
 <?php
+ini_set('max_execution_time', 0); 
+ini_set('memory_limit','2048M');
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Templates extends CORE_Controller {

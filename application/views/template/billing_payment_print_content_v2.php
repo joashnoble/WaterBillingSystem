@@ -126,9 +126,9 @@
         <tr>
             <td width="100%" style="text-align: right;font-size: ">  <?php 
             if($x == 1){
-                echo 'File Copy';
-            }else if ($x == 2){
                 echo 'Customer Copy';
+            }else if ($x == 2){
+                echo 'File Copy';
             }else{
                 echo 'Accounting Copy';
             }

@@ -144,9 +144,9 @@
             <td width="85%" style="font-size: 10pt!important;">NOTE:  For check payments, please make checks payable to <b>DON PEPE HENSON ENTERPRISES INC.</b></td>  
             <td width="15%" style="text-align: right;font-size: ">  <?php 
             if($x == 1){
-                echo 'File Copy';
-            }else if ($x == 2){
                 echo 'Customer Copy';
+            }else if ($x == 2){
+                echo 'File Copy';
             }else{
                 echo 'Accounting Copy';
             }

@@ -56,7 +56,7 @@
         <table style="font-size: 12px;" width="100%">
             <tbody>
                 <tr>
-                    <td>ACCOUNT NO : &nbsp;&nbsp; <?php echo $billing->account_no; ?></td>
+                    <td>METER SERIAL : &nbsp;&nbsp; <?php echo $billing->serial_no; ?></td>
                 </tr>
                 <tr>
                     <td style="text-transform: uppercase;">Customer Name : &nbsp;&nbsp; <?php echo $billing->receipt_name; ?></td>

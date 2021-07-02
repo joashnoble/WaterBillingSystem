@@ -23,6 +23,10 @@
     <!--/twitter typehead-->
     <link href="assets/plugins/twittertypehead/twitter.typehead.css" rel="stylesheet">
     <style>
+        #btn_export{
+            font-size: 15px!important;
+            padding: 6px 10px!important;
+        }
         .toolbar{
             float: left;
         }
@@ -164,6 +168,8 @@
                                         <div class="row">
                                             <div class="col-lg-3"><br>
                                                 <button class="btn btn-primary create_billing_payment"  id="btn_new" style="text-transform: capitalize;font-family: Tahoma, Georgia, Serif;" data-toggle="modal" data-target="" data-placement="left" title="New Payment" ><i class="fa fa-plus"></i>  New Payment</button>
+
+                                                <button class="btn btn-success"  id="btn_export" style="text-transform: capitalize;font-family: Tahoma, Georgia, Serif;" title="Export Collection Entry" ><i class="fa fa-file-excel-o"></i>  Export</button>
                                             </div>
                                             <div class="col-lg-2">
                                                     From :<br />
@@ -732,6 +738,14 @@
 
         var bindEventHandlers=(function(){
             var detailRows = [];
+
+            $('#btn_export').click(function(){
+                var tsd = $('#txt_start_date').val();
+                var ted = $('#txt_end_date').val();
+                var flt = $('#cbo_filter_active').val();
+
+                window.open('Billing_payments/transaction/export-collection?tsd='+tsd+'&ted='+ted+'&flt='+flt);
+            });    
 
             $('#tbl_payments tbody').on( 'click', 'tr td.details-control', function () {
                 var tr = $(this).closest('tr');

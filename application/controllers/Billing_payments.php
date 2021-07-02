@@ -18,6 +18,8 @@ class Billing_payments extends CORE_Controller
         $this->load->model('Billing_payments_model');
         $this->load->model('Billing_payment_items_model');
         $this->load->model('Payment_method_model');
+
+        $this->load->library('excel');
         $this->load->library('M_pdf');        
 
     }
@@ -285,6 +287,156 @@ class Billing_payments extends CORE_Controller
                 break;
 
 
+             case 'export-collection':
+
+                $m_company_info=$this->Company_model;
+                $company_info=$m_company_info->get_list();
+
+                $tsd = date('Y-m-d',strtotime($this->input->get('tsd')));
+                $ted = date('Y-m-d',strtotime($this->input->get('ted')));
+                $flt = $this->input->get('flt');
+
+                if($flt == 1){
+                    $filter_active = "DATE(billing_payments.date_paid) BETWEEN '$tsd' AND '$ted'";
+                    $filter_status = "ALL PAYMENTS";
+                }else if ($flt==2){
+                    $filter_active = "DATE(billing_payments.date_paid) BETWEEN '$tsd' AND '$ted' AND billing_payments.is_active = TRUE";
+                    $filter_status = "ACTIVE PAYMENTS";
+                }elseif ($flt==3) {
+                    $filter_active = "DATE(billing_payments.date_paid) BETWEEN '$tsd' AND '$ted' AND billing_payments.is_active = FALSE";
+                    $filter_status = "CANCELLED PAYMENTS";
+                }
+
+                $collections =$this->response_rows($filter_value,$filter_active);
+
+
+                $excel = $this->excel;
+
+                // $inputFileName = 'assets/files/CollectionReport.xlsx';
+                // $excel = PHPExcel_IOFactory::load($inputFileName);
+
+                $excel->setActiveSheetIndex(0);
+
+                $excel->getActiveSheet()->getColumnDimensionByColumn('A1:B1')->setWidth('30');
+                $excel->getActiveSheet()->getColumnDimensionByColumn('A2:C2')->setWidth('50');
+                $excel->getActiveSheet()->getColumnDimensionByColumn('A3')->setWidth('30');
+                $excel->getActiveSheet()->getColumnDimensionByColumn('A4')->setWidth('40');
+
+                //name the worksheet
+                $excel->getActiveSheet()->setTitle("Collection Report");
+                $excel->getActiveSheet()->getStyle('A1')->getFont()->setBold(TRUE);
+                $excel->getActiveSheet()->mergeCells('A1:B1');
+                $excel->getActiveSheet()->mergeCells('A2:C2');
+                $excel->getActiveSheet()->mergeCells('A3:B3');
+                $excel->getActiveSheet()->mergeCells('A4:B4');
+
+                $excel->getActiveSheet()->setCellValue('A1',$company_info[0]->company_name)
+                                        ->setCellValue('A2',$company_info[0]->company_address)
+                                        ->setCellValue('A3',$company_info[0]->landline.'/'.$company_info[0]->mobile_no)
+                                        ->setCellValue('A4',$company_info[0]->email_address);
+
+                $excel->getActiveSheet()->setCellValue('A6','Collection Report')
+                                        ->getStyle('A6')->getFont()->setBold(TRUE);
+                $excel->getActiveSheet()->setCellValue('A7',$tsd.' to '.$ted);
+                $excel->getActiveSheet()->setCellValue('A8',$filter_status);
+
+                $excel->getActiveSheet()->getColumnDimension('A')->setWidth('20');
+                $excel->getActiveSheet()->getColumnDimension('B')->setWidth('35');
+                $excel->getActiveSheet()->getColumnDimension('C')->setWidth('20');
+                $excel->getActiveSheet()->getColumnDimension('D')->setWidth('20');
+                $excel->getActiveSheet()->getColumnDimension('E')->setWidth('30');
+                $excel->getActiveSheet()->getColumnDimension('F')->setWidth('20');
+                $excel->getActiveSheet()->getColumnDimension('G')->setWidth('20');
+                $excel->getActiveSheet()->getColumnDimension('H')->setWidth('20');
+
+                $excel->getActiveSheet()
+                        ->getStyle('G9')
+                        ->getAlignment()
+                        ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT); 
+
+                $excel->getActiveSheet()->setCellValue('A9','Receipt #')
+                                        ->getStyle('A9')->getFont()->setBold(TRUE);
+                $excel->getActiveSheet()->setCellValue('B9','Customer')
+                                        ->getStyle('B9')->getFont()->setBold(TRUE);
+                $excel->getActiveSheet()->setCellValue('C9','Serial No')
+                                        ->getStyle('C9')->getFont()->setBold(TRUE);
+                $excel->getActiveSheet()->setCellValue('D9','Method')
+                                        ->getStyle('D9')->getFont()->setBold(TRUE);
+                $excel->getActiveSheet()->setCellValue('E9','Posted by')
+                                        ->getStyle('E9')->getFont()->setBold(TRUE);
+                $excel->getActiveSheet()->setCellValue('F9','Date Paid')
+                                        ->getStyle('F9')->getFont()->setBold(TRUE);
+                $excel->getActiveSheet()->setCellValue('G9','Amount')
+                                        ->getStyle('G9')->getFont()->setBold(TRUE);
+                $excel->getActiveSheet()->setCellValue('H9','Status')
+                                        ->getStyle('H9')->getFont()->setBold(TRUE);
+
+                $i=10;
+
+                foreach ($collections as $collection) {
+
+                    if($collection->is_active == 1){
+                        $status = "Active";
+                    }else{
+                        $status = "Cancelled";
+                    }
+
+                    $excel->getActiveSheet()
+                            ->getStyle('C'.$i)
+                            ->getAlignment()
+                            ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT); 
+
+                    $excel->getActiveSheet()
+                            ->getStyle('G'.$i)
+                            ->getAlignment()
+                            ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT); 
+
+
+                    $excel->getActiveSheet()->setCellValue('A'.$i,$collection->receipt_no)
+                                            ->setCellValue('B'.$i,$collection->receipt_name)
+                                            ->setCellValue('C'.$i,$collection->serial_no)
+                                            ->setCellValue('D'.$i,$collection->payment_method)
+                                            ->setCellValue('E'.$i,$collection->posted_by_user)
+                                            ->setCellValue('F'.$i,$collection->date_paid)
+                                            ->setCellValue('G'.$i,$collection->total_collection)
+                                            ->setCellValue('H'.$i,$status);
+
+                    $excel->getActiveSheet()->getStyle('G'.$i)->getNumberFormat()->setFormatCode('_(* #,##0.00_);_(* (#,##0.00);_(* "-"??_);_(@_)'); 
+                    $i++;
+
+                }
+
+                $last_row = count($collections) + 9;
+
+                $excel->getActiveSheet()
+                        ->getStyle('F'.$i.':G'.$i)
+                        ->getAlignment()
+                        ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT); 
+
+                $excel->getActiveSheet()->getStyle('G'.$i)->getNumberFormat()->setFormatCode('_(* #,##0.00_);_(* (#,##0.00);_(* "-"??_);_(@_)'); 
+
+                $excel->getActiveSheet()->setCellValue('F'.$i,'Total : ')
+                                        ->getStyle('F'.$i)->getFont()->setBold(TRUE);
+
+                $excel->getActiveSheet()->setCellValue('G'.$i,'=SUM(G10:G'.$last_row.')')
+                                        ->getStyle('G'.$i)->getFont()->setBold(TRUE);
+
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment;filename="Collection Report ('.$tsd.' - '.$ted.').xlsx"');
+                header('Cache-Control: max-age=0');
+                // If you're serving to IE 9, then the following may be needed
+                header('Cache-Control: max-age=1');
+
+                // If you're serving to IE over SSL, then the following may be needed
+                header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+                header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+                header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+                header ('Pragma: public'); // HTTP/1.0
+
+                $objWriter = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+                $objWriter->save('php://output'); 
+
+                break;
         }
 
 
@@ -308,6 +460,7 @@ class Billing_payments extends CORE_Controller
                 'DATE_FORMAT(billing_payments.date_paid,"%m/%d/%Y")as date_paid',
                 'DATE_FORMAT(billing_payments.check_date,"%m/%d/%Y")as check_date',
                 'FORMAT(billing_payments.total_paid_amount,2)as total_paid_amount',
+                'billing_payments.total_paid_amount as total_collection',
                 'payment_methods.payment_method',
                 'customers.customer_name',
                 'service_connection.account_no',
